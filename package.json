@@ -1,0 +1,58 @@
+{
+  "name": "site-scraper",
+  "description": "A tool to downloads any site into a local static site",
+  "version": "0.0.3",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "files": [
+    "lib/**/*.js"
+  ],
+  "type": "module",
+  "dependencies": {
+    "@clack/prompts": "^0.7.0",
+    "node-fetch": "^3.3.2",
+    "turndown": "^7.1.2",
+    "yaml": "^2.2.1"
+  },
+  "scripts": {
+    "publish": "npm run build && np",
+    "test": "c8 ava",
+    "build": "tsc",
+    "start": "tsc && node --experimental-specifier-resolution=node lib/index.js"
+  },
+  "devDependencies": {
+    "ava": "^5.0.0",
+    "c8": "^7.13.0",
+    "jsdom": "^21.1.2",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CloudCannon/site-scraper.git"
+  },
+  "author": "CloudCannon",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CloudCannon/site-scraper/issues"
+  },
+  "homepage": "https://github.com/CloudCannon/site-scraper#readme",
+  "ava": {
+    "extensions": {
+      "ts": "module"
+    },
+    "nodeArguments": [
+      "--loader=ts-node/esm",
+      "--experimental-specifier-resolution=node"
+    ],
+    "environmentVariables": {
+      "TS_NODE_LOG_ERROR": "true"
+    },
+    "require": [
+      "ts-node/register"
+    ]
+  }
+}
