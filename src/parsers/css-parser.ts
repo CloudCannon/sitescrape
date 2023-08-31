@@ -9,7 +9,8 @@ export default class CSSParser extends Parser {
         urlMatches?.forEach((match) => {
             const href = match.substring(4, match.length - 1)
                 .replace(/^['"]/, '')
-                .replace(/['"]$/, '');
+                .replace(/['"]$/, '')
+                .split('?')[0];
             if (href.startsWith('/')) {
                 links.push(href);
             }

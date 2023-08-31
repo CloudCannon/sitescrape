@@ -12,6 +12,7 @@ export const Parsers = {
 
 const contentTypeLookup = {
     'text/html': 'HTMLParser',
+    'application/xml': 'XMLParser',
     'text/xml': 'XMLParser',
     'text/css': 'CSSParser',
     'application/javascript': 'JSParser',

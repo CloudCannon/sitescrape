@@ -2,6 +2,7 @@ import Parser from "./parser";
 import { JSDOM } from 'jsdom';
 import CSSParser from "./css-parser";
 import * as path from 'path';
+import { parseSrcset } from 'srcset';
 
 export default class HTMLParser extends Parser {
     async parse() : Promise<string[]> {
@@ -23,6 +24,19 @@ export default class HTMLParser extends Parser {
             if (src.startsWith('/')) {
                 links.push(src);
             }
+        });
+
+        const srcsets = dom.window.document.querySelectorAll("[srcset]");
+        srcsets.forEach((node) => {
+            const srcset = node.getAttribute('srcset');
+            const parsed = parseSrcset(srcset);
+
+            parsed.forEach((value) => {
+                const src = value.url.split('?')[0];
+                if (src.startsWith('/')) {
+                    links.push(src);
+                }
+            })
         });
 
         const inlineStyles = dom.window.document.querySelectorAll("[style]");

@@ -68,9 +68,9 @@ export default class Scraper {
         if (!error) {
             let relativePath = nextUrl;
             let body;
+
+            const contentType = response.headers.get('content-type');
             if (response.status === 200) {
-                const contentType = response.headers.get('content-type');
-    
                 const parserClass = contentTypeToParser(contentType);
                 if (parserClass) {
                     body = await response.text();
@@ -104,7 +104,7 @@ export default class Scraper {
                 }
             }
             // Do installation here
-            s.stop(`Downloaded ${liveUrl}: ${response.status}`);
+            s.stop(`Downloaded ${liveUrl}: ${contentType} ${response.status}`);
         } else {
             // Do installation here
             s.stop(`Downloaded ${liveUrl}: ${error}`);
