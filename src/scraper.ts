@@ -88,9 +88,13 @@ export default class Scraper {
                         this.queue.push(link);
                     });
 
-                    const prettierOptions = parser.prettierOptions();
-                    if (prettierOptions) {
-                        body = await prettier.format(body, prettierOptions);
+                    try {
+                        const prettierOptions = parser.prettierOptions();
+                        if (prettierOptions) {
+                            body = await prettier.format(body, prettierOptions);
+                        }
+                    } catch (prettierError) {
+                        p.log.error(prettierError.message);
                     }
                 }
         
