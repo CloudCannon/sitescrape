@@ -1,17 +1,21 @@
 import XMLParser from "./xml-parser";
 import HTMLParser from "./html-parser";
 import CSSParser from "./css-parser";
+import JSParser from "./js-parser";
 
 export const Parsers = {
     XMLParser,
     HTMLParser,
-    CSSParser
+    CSSParser,
+    JSParser
 };
 
 const contentTypeLookup = {
     'text/html': 'HTMLParser',
     'text/xml': 'XMLParser',
     'text/css': 'CSSParser',
+    'application/javascript': 'JSParser',
+	'text/javascript': 'JSParser',
 }
 
 export function contentTypeToParser(contentType: string) : string | null {

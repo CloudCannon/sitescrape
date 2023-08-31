@@ -13,7 +13,9 @@
   "type": "module",
   "dependencies": {
     "@clack/prompts": "^0.7.0",
+    "@prettier/plugin-xml": "^3.2.0",
     "node-fetch": "^3.3.2",
+    "prettier": "^3.0.3",
     "turndown": "^7.1.2",
     "yaml": "^2.2.1"
   },

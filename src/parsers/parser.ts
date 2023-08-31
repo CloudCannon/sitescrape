@@ -21,4 +21,8 @@ export default class Parser {
     processedPath() : string {
         return this.options.relativePath;
     }
+
+    prettierOptions() : void {
+        return null;
+    }
 }

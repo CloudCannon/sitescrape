@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import fetch from 'node-fetch';
 import { Parsers, contentTypeToParser } from './parsers/all';
+import * as prettier from "prettier";
 
 interface ScraperOptions {
     absolutePath: string;
@@ -86,6 +87,11 @@ export default class Scraper {
                     links.forEach((link) => {
                         this.queue.push(link);
                     });
+
+                    const prettierOptions = parser.prettierOptions();
+                    if (prettierOptions) {
+                        body = await prettier.format(body, prettierOptions);
+                    }
                 }
         
                 const absolutePath = path.join(this.options.absolutePath, relativePath);

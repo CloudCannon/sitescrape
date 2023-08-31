@@ -1,6 +1,7 @@
 import Parser from "./parser";
 import { JSDOM } from 'jsdom';
 import CSSParser from "./css-parser";
+import * as path from 'path';
 
 export default class HTMLParser extends Parser {
     async parse() : Promise<string[]> {
@@ -52,9 +53,13 @@ export default class HTMLParser extends Parser {
     }
 
     processedPath() : string {
-        if (this.options.relativePath.endsWith('/')) {
-            return `${this.options.relativePath}index.html`;
+        if (!this.options.relativePath.endsWith('.html')) {
+            return path.join(this.options.relativePath, 'index.html');
         }
         return this.options.relativePath;
+    }
+
+    prettierOptions() : Record<string, any> {
+        return { parser: "html" };
     }
 }

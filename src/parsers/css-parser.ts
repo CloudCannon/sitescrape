@@ -17,4 +17,8 @@ export default class CSSParser extends Parser {
 
         return links;
     }
+
+    prettierOptions() : Record<string, any> {
+        return { parser: "css" };
+    }
 }
