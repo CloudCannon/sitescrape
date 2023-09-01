@@ -125,21 +125,28 @@ export default class Scraper {
                 }
         
                 const absolutePath = path.join(this.options.absolutePath, relativePath);
-                const dirname = path.dirname(absolutePath);
-                await fs.promises.mkdir(dirname, { recursive: true })
-                if (!body) {
-                    await response.body.pipe(fs.createWriteStream(absolutePath))
+                if (!absolutePath.endsWith('/')) {
+                    const dirname = path.dirname(absolutePath);
+                    await fs.promises.mkdir(dirname, { recursive: true })
+                    if (!body) {
+                        await response.body.pipe(fs.createWriteStream(absolutePath))
+                    } else {
+                        await fs.promises.writeFile(absolutePath, body);
+                    }
+                    s.stop(`Downloaded ${liveUrl}: ${contentType} ${response.status}`);
                 } else {
-                    await fs.promises.writeFile(absolutePath, body);
+                    s.stop(`Prevented folder file ${liveUrl}: ${contentType} ${response.status}`);
                 }
-                s.stop(`Downloaded ${liveUrl}: ${contentType} ${response.status}`);
             } else {
                 const redirect = response.headers.get('location');
                 if (redirect) {
                     this.processNewLink(redirect);
+                    const redirectUrl = new URL(redirect, this.options.base);
                     this.redirects.push({
                         from: url.pathname,
-                        to: redirect,
+                        to: redirectUrl.origin === this.options.base
+                            ? redirectUrl.pathname
+                            : redirect,
                         status: response.status
                     });
                     s.stop(`Redirect ${liveUrl} to ${redirect} ${response.status}`);
