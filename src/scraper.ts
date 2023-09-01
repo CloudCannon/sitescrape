@@ -1,3 +1,4 @@
+import { URL } from 'node:url';
 import * as p from "@clack/prompts";
 import * as fs from 'fs';
 import * as path from 'path';
@@ -7,12 +8,19 @@ import * as prettier from "prettier";
 
 interface ScraperOptions {
     absolutePath: string;
-    url: string;
+    base: string;
+}
+
+interface Redirect {
+    from: string;
+    to: string;
+    status: number;
 }
 
 export default class Scraper {
     options: ScraperOptions;
     completed: Record<string, boolean>;
+    redirects: Redirect[];
     queue: string[];
 
     constructor(options: ScraperOptions) {
@@ -22,20 +30,40 @@ export default class Scraper {
     async start() : Promise<void> {
         this.completed = {};
         this.queue = [];
+        this.redirects = [];
         this.queue.push('/');
         this.queue.push('/sitemap.xml');
-        return this.scrapeNext();
+        while (this.queue.length > 0) {
+            await this.scrapeNext();
+        }
+
+        if (this.redirects.length > 0) {
+            const s = p.spinner();
+            s.start('Saving routing.json');
+            const absolutePath = path.join(this.options.absolutePath, '.cloudcannon/routing.json');
+            const dirname = path.dirname(absolutePath);
+            await fs.promises.mkdir(dirname, { recursive: true })
+            await fs.promises.writeFile(absolutePath, JSON.stringify({
+                routes: this.redirects
+            }, null, '\t'));
+            s.stop('Saved routing.json');
+        }
     }
 
     async scrapeNext() : Promise<void> {
-        const nextUrl = this.queue.shift();
-        if (!nextUrl) {
+        const urlPath = this.queue.shift();
+        if (!urlPath) {
             return;
         }
 
-        const liveUrl = path.join(this.options.url, nextUrl);
+        const url = new URL(urlPath, this.options.base);
+        if (url.origin !== this.options.base) {
+            return
+        }
+
+        const liveUrl = url.href;
         if (this.completed[liveUrl]) {
-            return this.scrapeNext();
+            return
         }
 
         const s = p.spinner();
@@ -46,6 +74,7 @@ export default class Scraper {
         let error;
         try {
             response = await fetch(liveUrl, {
+                redirect: 'manual',
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/109.0',
                     Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
@@ -66,7 +95,7 @@ export default class Scraper {
         }
 
         if (!error) {
-            let relativePath = nextUrl;
+            let relativePath = urlPath;
             let body;
 
             const contentType = response.headers.get('content-type');
@@ -76,17 +105,14 @@ export default class Scraper {
                     body = await response.text();
                     const parser = new Parsers[parserClass]({
                         body,
-                        relativePath,
-                        url: this.options.url
+                        relativePath
                     });
     
                     relativePath = parser.processedPath();
     
                     const links = await parser.parse();
     
-                    links.forEach((link) => {
-                        this.queue.push(link);
-                    });
+                    links.forEach((link) => this.processNewLink(link));
 
                     try {
                         const prettierOptions = parser.prettierOptions();
@@ -106,15 +132,30 @@ export default class Scraper {
                 } else {
                     await fs.promises.writeFile(absolutePath, body);
                 }
+                s.stop(`Downloaded ${liveUrl}: ${contentType} ${response.status}`);
+            } else {
+                const redirect = response.headers.get('location');
+                if (redirect) {
+                    this.processNewLink(redirect);
+                    this.redirects.push({
+                        from: url.pathname,
+                        to: redirect,
+                        status: response.status
+                    });
+                    s.stop(`Redirect ${liveUrl} to ${redirect} ${response.status}`);
+                } else {
+                    s.stop(`Unhandled status ${liveUrl}: ${contentType} ${response.status}`);
+                }
             }
-            // Do installation here
-            s.stop(`Downloaded ${liveUrl}: ${contentType} ${response.status}`);
         } else {
-            // Do installation here
             s.stop(`Downloaded ${liveUrl}: ${error}`);
         }
-        
-        return this.scrapeNext();
     }
 
+    processNewLink(link : string) : void {
+        const url = new URL(link, this.options.base);
+        if (url.origin === this.options.base) {
+            this.queue.push(url.pathname);
+        }
+    }
 }

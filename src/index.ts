@@ -1,3 +1,4 @@
+import { URL } from 'node:url';
 import * as p from "@clack/prompts";
 import * as path from 'path';
 import * as fs from 'fs';
@@ -5,16 +6,20 @@ import Scraper from "./scraper";
 
 p.intro(`Welcome to the site scraper`);
 
-const url = await p.text({
+const base = await p.text({
   message: `What site would you like to download?`,
   placeholder: "https://example.com/",
   initialValue: "",
   validate(value) {
     if (value.length === 0) return `Value is required!`;
+    const url = new URL(value);
+    if (url.pathname !== '/') return `Do not specify pathname, not ${url.pathname}`;
+    if (url.search) return `Do not specify a search query, not ${url.search}`;
+    if (url.protocol !== 'https:') return `Must be https: not ${url.protocol}`;
   },
 });
 
-if (p.isCancel(url)) {
+if (p.isCancel(base)) {
   p.cancel("Site scrape cancelled.");
   process.exit(0);
 }
@@ -59,7 +64,7 @@ try {
 }
 
 const shouldContinue = await p.confirm({
-  message: `I confirm that I am legally allowed to download the site at ${url} to ${relativePath}?`,
+  message: `I confirm that I am legally allowed to download the site at ${base} to ${relativePath}?`,
 });
 
 if (p.isCancel(shouldContinue)) {
@@ -75,10 +80,12 @@ if (!shouldContinue) {
 try {
   const scraper = new Scraper({
     absolutePath,
-    url
+    base: new URL(base).origin
   })
   await scraper.start();
 } catch (error) {
   p.cancel(error.message);
   process.exit(1);
 }
+
+p.outro(`All done`);

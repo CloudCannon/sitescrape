@@ -1,7 +1,6 @@
 interface ParserOptions {
     body: string;
     relativePath: string;
-    url: string;
 }
 
 export default class Parser {

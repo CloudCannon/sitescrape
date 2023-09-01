@@ -9,12 +9,8 @@ export default class XMLParser extends Parser {
 
         const locTags = dom.window.document.querySelectorAll("loc, link");
         await Promise.all(Array.from(locTags).map(async (node : any) => {
-            const text = node.textContent.trim().split('?')[0];
-            if (text.startsWith(this.options.url)) {
-                links.push(text.substring(this.options.url.length))
-            }
+            links.push(node.textContent.trim())
         }));
-
 
         return links;
     }

@@ -12,18 +12,12 @@ export default class HTMLParser extends Parser {
 
         const hrefs = dom.window.document.querySelectorAll("[href]");
         hrefs.forEach((node) => {
-            const href = node.getAttribute('href').split('?')[0];
-            if (href.startsWith('/')) {
-                links.push(href);
-            }
+            links.push(node.getAttribute('href'));
         });
 
         const srcs = dom.window.document.querySelectorAll("[src]");
         srcs.forEach((node) => {
-            const src = node.getAttribute('src').split('?')[0];
-            if (src.startsWith('/')) {
-                links.push(src);
-            }
+            links.push(node.getAttribute('src'));
         });
 
         const srcsets = dom.window.document.querySelectorAll("[srcset]");
@@ -32,11 +26,8 @@ export default class HTMLParser extends Parser {
             const parsed = parseSrcset(srcset);
 
             parsed.forEach((value) => {
-                const src = value.url.split('?')[0];
-                if (src.startsWith('/')) {
-                    links.push(src);
-                }
-            })
+                links.push(value.url);
+            });
         });
 
         const inlineStyles = dom.window.document.querySelectorAll("[style]");
