@@ -24,10 +24,11 @@ if (p.isCancel(base)) {
   process.exit(0);
 }
 
+const url = new URL(base);
 const relativePath = await p.text({
   message: "Where would you like to download it to?",
   placeholder: "./_site/",
-  initialValue: "./_site/",
+  initialValue: `./${url.hostname}/`,
   validate(value) {
     if (value.length === 0) return `Value is required!`;
     if (!value.startsWith('./')) return `Value must be relative`;
