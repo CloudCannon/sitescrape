@@ -1,7 +1,7 @@
 {
   "name": "sitescrape",
   "description": "A WIP tool to downloads any site into a local static site",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "main": "lib/index.js",
   "bin": "lib/index.js",
   "engines": {
