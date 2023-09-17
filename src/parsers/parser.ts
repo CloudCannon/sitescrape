@@ -1,27 +1,27 @@
 interface ParserOptions {
-    body: string;
-    relativePath: string;
+	body: string;
+	relativePath: string;
 }
 
 export default class Parser {
-    options: ParserOptions;
-    links: string[];
+	options: ParserOptions;
+	links: string[];
 
-    constructor(options: ParserOptions) {
-        this.options = options;
-        this.links = [];
-    }
+	constructor(options: ParserOptions) {
+		this.options = options;
+		this.links = [];
+	}
 
-    async parse() : Promise<string[]> {
-        const links = [];
-        return links;
-    }
+	async parse(): Promise<string[]> {
+		const links: string[] = [];
+		return links;
+	}
 
-    processedPath() : string {
-        return this.options.relativePath;
-    }
+	processedPath(): string {
+		return this.options.relativePath;
+	}
 
-    prettierOptions() : void {
-        return null;
-    }
+	prettierOptions(): Record<string, any> | null {
+		return null;
+	}
 }

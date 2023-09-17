@@ -3,8 +3,9 @@
 		"target": "ES2022",
 		"module": "ES2022",
 		"moduleResolution": "node",
+		"strict": true,
 		"outDir": "./lib"
 	},
-	"include": ["src"],
+	"include": ["src", "test/dom.ts", "test/helpers/test-logger.ts"],
 	"exclude": ["node_modules", "test"]
 }
