@@ -5,22 +5,24 @@ import * as path from 'node:path';
 import { Parsers, contentTypeToParser, contentTypeToExtension } from './parsers/all.ts';
 import * as prettier from 'prettier';
 import Parser from './parsers/parser.ts';
+import type { Route, Routing } from '@cloudcannon/configuration-types';
+
+const validRouteStatuses = new Set([200, 301, 302, 303, 307, 308, 404, 410] as const);
+type RouteStatus = Route['status'] & number;
+
+function isRouteStatus(status: number): status is RouteStatus {
+	return validRouteStatuses.has(status as RouteStatus);
+}
 
 interface ScraperOptions {
 	absolutePath: string;
 	base: string;
 }
 
-interface Redirect {
-	from: string;
-	to: string;
-	status: number;
-}
-
 export default class Scraper {
 	options: ScraperOptions;
 	completed: Record<string, boolean>;
-	redirects: Redirect[];
+	redirects: Route[];
 	queue: string[];
 
 	constructor(options: ScraperOptions) {
@@ -46,15 +48,10 @@ export default class Scraper {
 			const absolutePath = path.join(this.options.absolutePath, '.cloudcannon/routing.json');
 			const dirname = path.dirname(absolutePath);
 			await fs.promises.mkdir(dirname, { recursive: true });
+			const routing: Routing = { routes: this.redirects };
 			await fs.promises.writeFile(
 				absolutePath,
-				JSON.stringify(
-					{
-						routes: this.redirects
-					},
-					null,
-					'\t'
-				)
+				JSON.stringify(routing, null, '\t')
 			);
 			s.stop('Saved routing.json');
 		}
@@ -166,14 +163,17 @@ export default class Scraper {
 				if (redirect) {
 					this.processNewLink(redirect);
 					const redirectUrl = new URL(redirect, this.options.base);
-					this.redirects.push({
+					const route: Route = {
 						from: url.pathname,
 						to:
 							redirectUrl.origin === this.options.base
 								? redirectUrl.pathname
-								: redirect,
-						status: response.status
-					});
+								: redirect
+					};
+					if (isRouteStatus(response.status)) {
+						route.status = response.status;
+					}
+					this.redirects.push(route);
 					s.stop(`Redirect ${liveUrl} to ${redirect} ${response.status}`);
 				} else {
 					s.stop(`Unhandled status ${liveUrl}: ${contentType} ${response.status}`);
