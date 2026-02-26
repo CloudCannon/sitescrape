@@ -1,4 +1,4 @@
-import Parser from './parser';
+import Parser from './parser.ts';
 
 export default class JSParser extends Parser {
 	prettierOptions(): Record<string, any> | null {

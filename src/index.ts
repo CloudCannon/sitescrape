@@ -1,9 +1,9 @@
-#!/usr/bin/env node --experimental-specifier-resolution=node
+#!/usr/bin/env node
 import { URL } from 'node:url';
 import * as p from '@clack/prompts';
-import * as path from 'path';
-import * as fs from 'fs';
-import Scraper from './scraper';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
+import Scraper from './scraper.ts';
 
 p.intro(`Welcome to the site scraper`);
 
@@ -11,7 +11,7 @@ const base = await p.text({
 	message: `What site would you like to download?`,
 	placeholder: 'https://example.com/',
 	initialValue: '',
-	validate(value) {
+	validate(value = '') {
 		if (value.length === 0) return `Value is required!`;
 		const url = new URL(value);
 		if (url.pathname !== '/') return `Do not specify pathname, not ${url.pathname}`;
@@ -30,7 +30,7 @@ const relativePath = await p.text({
 	message: 'Where would you like to download it to?',
 	placeholder: './_site/',
 	initialValue: `./${url.hostname}/`,
-	validate(outputPath) {
+	validate(outputPath = '') {
 		if (outputPath.length === 0) return `Output path is required!`;
 		if (!outputPath.startsWith('./')) return `Output path must be relative`;
 		if (path.normalize(outputPath).includes('..')) return `Output path must be relative`;

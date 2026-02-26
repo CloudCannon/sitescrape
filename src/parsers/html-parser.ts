@@ -1,7 +1,7 @@
-import Parser from './parser';
+import Parser from './parser.ts';
 import { JSDOM } from 'jsdom';
-import CSSParser from './css-parser';
-import * as path from 'path';
+import CSSParser from './css-parser.ts';
+import * as path from 'node:path';
 import { parseSrcset } from 'srcset';
 
 export default class HTMLParser extends Parser {

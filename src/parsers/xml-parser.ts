@@ -1,6 +1,6 @@
-import Parser from './parser';
+import Parser from './parser.ts';
 import { JSDOM } from 'jsdom';
-import * as path from 'path';
+import * as path from 'node:path';
 
 export default class XMLParser extends Parser {
 	async parse(): Promise<string[]> {

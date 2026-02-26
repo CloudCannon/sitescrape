@@ -1,7 +1,7 @@
-import XMLParser from './xml-parser';
-import HTMLParser from './html-parser';
-import CSSParser from './css-parser';
-import JSParser from './js-parser';
+import XMLParser from './xml-parser.ts';
+import HTMLParser from './html-parser.ts';
+import CSSParser from './css-parser.ts';
+import JSParser from './js-parser.ts';
 
 export const Parsers: Record<string, any> = {
 	XMLParser,
@@ -30,6 +30,28 @@ export function contentTypeToParser(contentType: string | null): string | null {
 				return contentTypeLookup[type];
 			}
 		}
+	}
+	return null;
+}
+
+const extensionLookup: Record<string, string> = {
+	'text/html': '.html',
+	'application/xml': '.xml',
+	'text/xml': '.xml',
+	'application/rss+xml': '.xml',
+	'application/atom+xml': '.xml',
+	'text/css': '.css',
+	'application/javascript': '.js',
+	'text/javascript': '.js',
+	'application/json': '.json',
+	'application/ld+json': '.json',
+	'text/plain': '.txt'
+};
+
+export function contentTypeToExtension(contentType: string | null): string | null {
+	if (contentType) {
+		const type = contentType.split(';')[0].trim();
+		return extensionLookup[type] ?? null;
 	}
 	return null;
 }

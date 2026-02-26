@@ -1,11 +1,10 @@
 import { URL } from 'node:url';
 import * as p from '@clack/prompts';
-import * as fs from 'fs';
-import * as path from 'path';
-import fetch from 'node-fetch';
-import { Parsers, contentTypeToParser } from './parsers/all';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { Parsers, contentTypeToParser, contentTypeToExtension } from './parsers/all.ts';
 import * as prettier from 'prettier';
-import Parser from './parsers/parser';
+import Parser from './parsers/parser.ts';
 
 interface ScraperOptions {
 	absolutePath: string;
@@ -136,14 +135,25 @@ export default class Scraper {
 					}
 				}
 
+				if (relativePath.endsWith('/')) {
+					const ext = contentTypeToExtension(contentType);
+					if (ext) {
+						const originalPath = relativePath;
+						relativePath = path.join(relativePath, `index${ext}`);
+						this.redirects.push({
+							from: originalPath,
+							to: '/' + relativePath,
+							status: 200
+						});
+					}
+				}
+
 				const absolutePath = path.join(this.options.absolutePath, relativePath);
 				if (!absolutePath.endsWith('/')) {
 					const dirname = path.dirname(absolutePath);
 					await fs.promises.mkdir(dirname, { recursive: true });
 					if (!body) {
-						if (response.body) {
-							await response.body.pipe(fs.createWriteStream(absolutePath));
-						}
+						await fs.promises.writeFile(absolutePath, Buffer.from(await response.arrayBuffer()));
 					} else {
 						await fs.promises.writeFile(absolutePath, body);
 					}
